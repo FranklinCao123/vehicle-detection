@@ -14,7 +14,7 @@
     }
   ],
   "num_detections": 1,
-  "inference_time_ms": 360.2,
+  "inference_time_ms": 349.0,
   "conf_threshold": 0.1,
   "imgsz": 1280,
   "weights": "models\\yolov8s.pt"
