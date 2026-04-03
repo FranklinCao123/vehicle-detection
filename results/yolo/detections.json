@@ -1,0 +1,21 @@
+{
+  "image": "待检测图片.png",
+  "model": "YOLOv8s",
+  "model_params": "3.2M",
+  "detections": [
+    {
+      "confidence": 0.109,
+      "bbox": [
+        677.6,
+        233.5,
+        704.0,
+        248.0
+      ]
+    }
+  ],
+  "num_detections": 1,
+  "inference_time_ms": 360.2,
+  "conf_threshold": 0.1,
+  "imgsz": 1280,
+  "weights": "models\\yolov8s.pt"
+}
