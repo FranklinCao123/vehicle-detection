@@ -14,7 +14,7 @@
     }
   ],
   "num_detections": 1,
-  "inference_time_ms": 1819.0,
+  "inference_time_ms": 1664.9,
   "conf_threshold": 0.1,
   "min_size": 800,
   "max_size": 1333,
