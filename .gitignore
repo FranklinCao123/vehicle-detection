@@ -1,0 +1,42 @@
+# Python缓存
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+*.egg
+
+# 虚拟环境
+venv/
+ENV/
+env/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 模型文件（自动下载，无需版本控制）
+models/*.pt
+models/*.pth
+models/*.onnx
+
+# 运行生成的文件
+results/
+!results/.gitkeep
+
+# 数据文件
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+
+# 日志文件
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
