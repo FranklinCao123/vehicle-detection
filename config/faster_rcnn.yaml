@@ -1,0 +1,14 @@
+model:
+  name: Faster R-CNN
+  weights: torchvision::fasterrcnn_resnet50_fpn
+  device: cpu
+
+detection:
+  conf_threshold: 0.1
+  min_size: 800
+  max_size: 1333
+
+paths:
+  input_dir: data
+  input_image: ""
+  output_dir: results

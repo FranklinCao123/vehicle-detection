@@ -1,0 +1,22 @@
+{
+  "image": "待检测图片.png",
+  "model": "Faster R-CNN",
+  "model_params": "~41M",
+  "detections": [
+    {
+      "confidence": 0.288,
+      "bbox": [
+        677.9,
+        234.2,
+        703.2,
+        248.0
+      ]
+    }
+  ],
+  "num_detections": 1,
+  "inference_time_ms": 1819.0,
+  "conf_threshold": 0.1,
+  "min_size": 800,
+  "max_size": 1333,
+  "weights": "torchvision::fasterrcnn_resnet50_fpn"
+}
