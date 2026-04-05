@@ -4,7 +4,12 @@ model:
 
 detection:
   conf_threshold: 0.1
-  imgsz: 1280
+  imgsz: 1312
+  iou: 0.5
+  augment: false
+  use_preprocess: true
+  debug_print: false
+  filter_vehicle_only: true
 
 paths:
   input_dir: data

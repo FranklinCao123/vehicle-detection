@@ -1,0 +1,15 @@
+# 车辆分析配置文件
+image_path: "data/待检测图片.png"
+
+# 预处理参数（用于测试预处理效果）
+preprocess:
+  clip_limit: 1.5    # CLAHE强度
+  sharpen: true     # 是否锐化
+
+# 要分析的车辆区域
+regions:
+  - name: "能检出的车"
+    bbox: [677, 233, 704, 248]
+    
+  - name: "检不出的车"
+    bbox: [460, 225, 500, 250]

@@ -1,0 +1,28 @@
+{
+  "image": "待检测图片.png",
+  "model": "YOLOv8s",
+  "detections": [
+    {
+      "confidence": 0.243,
+      "bbox": [
+        677.9,
+        233.0,
+        704.1,
+        248.0
+      ]
+    },
+    {
+      "confidence": 0.118,
+      "bbox": [
+        196.1,
+        415.7,
+        222.9,
+        436.7
+      ]
+    }
+  ],
+  "num_detections": 2,
+  "inference_time_ms": 450.0,
+  "conf_threshold": 0.1,
+  "preprocessing_enabled": true
+}

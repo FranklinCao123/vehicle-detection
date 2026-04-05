@@ -2,21 +2,81 @@
   "image": "待检测图片.png",
   "model": "Faster R-CNN",
   "model_params": "~41M",
-  "detections": [
+  "all_detections": [
     {
-      "confidence": 0.288,
+      "class": "bird",
+      "confidence": 0.709,
+      "bbox": [
+        302.6,
+        270.6,
+        338.9,
+        302.4
+      ]
+    },
+    {
+      "class": "car",
+      "confidence": 0.597,
       "bbox": [
         677.9,
-        234.2,
-        703.2,
-        248.0
+        232.9,
+        705.2,
+        248.9
+      ]
+    },
+    {
+      "class": "person",
+      "confidence": 0.442,
+      "bbox": [
+        651.4,
+        128.0,
+        656.4,
+        137.1
+      ]
+    },
+    {
+      "class": "person",
+      "confidence": 0.39,
+      "bbox": [
+        466.0,
+        209.9,
+        478.7,
+        221.1
+      ]
+    },
+    {
+      "class": "car",
+      "confidence": 0.363,
+      "bbox": [
+        461.4,
+        228.4,
+        499.9,
+        245.2
       ]
     }
   ],
-  "num_detections": 1,
-  "inference_time_ms": 1664.9,
-  "conf_threshold": 0.1,
-  "min_size": 800,
-  "max_size": 1333,
-  "weights": "torchvision::fasterrcnn_resnet50_fpn"
+  "num_all_detections": 5,
+  "detections": [
+    {
+      "confidence": 0.597,
+      "bbox": [
+        677.9,
+        232.9,
+        705.2,
+        248.9
+      ]
+    },
+    {
+      "confidence": 0.363,
+      "bbox": [
+        461.4,
+        228.4,
+        499.9,
+        245.2
+      ]
+    }
+  ],
+  "num_detections": 2,
+  "inference_time_ms": 1776.9,
+  "conf_threshold": 0.3,
+  "preprocessing_enabled": true
 }

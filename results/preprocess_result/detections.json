@@ -1,0 +1,22 @@
+{
+  "image": "待检测图片.png",
+  "model": "YOLOv8s",
+  "all_detections": [
+    {
+      "class": "clock",
+      "confidence": 0.321,
+      "bbox": [
+        122.6,
+        412.5,
+        141.0,
+        437.8
+      ]
+    }
+  ],
+  "num_all_detections": 1,
+  "detections": [],
+  "num_detections": 0,
+  "inference_time_ms": 401.0,
+  "conf_threshold": 0.1,
+  "preprocessing_enabled": true
+}

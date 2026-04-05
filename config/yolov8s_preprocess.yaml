@@ -1,0 +1,17 @@
+model:
+  name: YOLOv8s
+  weights: models/yolov8s.pt
+
+detection:
+  conf_threshold: 0.1
+  imgsz: 1280
+
+preprocessing:
+  enabled: true
+  clahe_clip_limit: 100  # 从2.0提高到3.0，增强对比度
+  sharpen: true            # 开启锐化
+
+paths:
+  input_dir: data
+  input_image: ""
+  output_dir: results

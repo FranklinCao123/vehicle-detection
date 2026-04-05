@@ -1,21 +1,26 @@
 {
   "image": "待检测图片.png",
   "model": "YOLOv8s",
-  "model_params": "3.2M",
+  "model_params": "11.2M",
   "detections": [
     {
-      "confidence": 0.109,
+      "class_name": "car",
+      "confidence": 0.139,
       "bbox": [
-        677.6,
-        233.5,
-        704.0,
-        248.0
+        676.7,
+        233.2,
+        704.2,
+        249.3
       ]
     }
   ],
   "num_detections": 1,
-  "inference_time_ms": 344.0,
+  "inference_time_ms": 383.0,
   "conf_threshold": 0.1,
-  "imgsz": 1280,
+  "iou": 0.5,
+  "imgsz": 1312,
+  "augment": false,
+  "use_preprocess": true,
+  "filter_vehicle_only": true,
   "weights": "models\\yolov8s.pt"
 }
