@@ -4,13 +4,13 @@ model:
   device: cpu  # 如果有GPU可以改成 cuda
 
 detection:
-  conf_threshold: 0.3    # 降低阈值，检出更多
+  conf_threshold: 0.2    # 降低阈值，检出更多
   min_size: 800
   max_size: 1333
 
 preprocessing:
   enabled: true
-  clahe_clip_limit: 0.8   # 对比度强度
+  clahe_clip_limit: 0.8  # 对比度强度
   sharpen: true          # 锐化
 
 paths:

@@ -52,9 +52,39 @@
         499.9,
         245.2
       ]
+    },
+    {
+      "class": "bird",
+      "confidence": 0.278,
+      "bbox": [
+        423.6,
+        217.3,
+        444.1,
+        231.6
+      ]
+    },
+    {
+      "class": "bird",
+      "confidence": 0.257,
+      "bbox": [
+        651.5,
+        241.4,
+        671.2,
+        259.7
+      ]
+    },
+    {
+      "class": "boat",
+      "confidence": 0.238,
+      "bbox": [
+        460.9,
+        228.8,
+        499.2,
+        246.0
+      ]
     }
   ],
-  "num_all_detections": 5,
+  "num_all_detections": 8,
   "detections": [
     {
       "confidence": 0.597,
@@ -63,7 +93,8 @@
         232.9,
         705.2,
         248.9
-      ]
+      ],
+      "class": "car"
     },
     {
       "confidence": 0.363,
@@ -72,11 +103,12 @@
         228.4,
         499.9,
         245.2
-      ]
+      ],
+      "class": "car"
     }
   ],
   "num_detections": 2,
-  "inference_time_ms": 1776.9,
-  "conf_threshold": 0.3,
+  "inference_time_ms": 1774.0,
+  "conf_threshold": 0.2,
   "preprocessing_enabled": true
 }

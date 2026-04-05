@@ -1,5 +1,5 @@
 """
-Faster R-CNN 车辆检测脚本 - 预处理版本（CLAHE + 锐化）
+Faster R-CNN 车辆检测脚本 - 预处理版本(CLAHE + 锐化）
 """
 import time
 from pathlib import Path
@@ -8,7 +8,7 @@ import torch
 import yaml
 import cv2
 import numpy as np
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFont
 from torchvision.models.detection import (
     fasterrcnn_resnet50_fpn,
     FasterRCNN_ResNet50_FPN_Weights,
@@ -79,7 +79,6 @@ def save_image(image, save_path: Path):
 
 def preprocess_image(image: np.ndarray, clip_limit: float = 2.5, sharpen: bool = True) -> np.ndarray:
     """预处理：CLAHE对比度增强 + 可选锐化"""
-    # 1. CLAHE增强（转LAB，只增强亮度通道）
     lab = cv2.cvtColor(image, cv2.COLOR_BGR2LAB)
     l, a, b = cv2.split(lab)
     
@@ -89,7 +88,6 @@ def preprocess_image(image: np.ndarray, clip_limit: float = 2.5, sharpen: bool =
     enhanced_lab = cv2.merge((l_enhanced, a, b))
     result = cv2.cvtColor(enhanced_lab, cv2.COLOR_LAB2BGR)
     
-    # 2. 锐化（增强边缘）
     if sharpen:
         kernel = np.array([[-1, -1, -1],
                            [-1,  9, -1],
@@ -103,6 +101,32 @@ def numpy_to_pil(image: np.ndarray) -> Image.Image:
     """将numpy数组转换为PIL Image"""
     image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     return Image.fromarray(image_rgb)
+
+
+def draw_single_box_pil(drawer, x1, y1, x2, y2, label, color):
+    """绘制单个边界框和标签（带背景色）"""
+    # 绘制边界框
+    drawer.rectangle([x1, y1, x2, y2], outline=color, width=2)
+    
+    # 获取文本尺寸
+    try:
+        # 尝试使用默认字体
+        font = ImageFont.load_default()
+        bbox = drawer.textbbox((0, 0), label, font=font)
+        text_width = bbox[2] - bbox[0]
+        text_height = bbox[3] - bbox[1]
+    except:
+        text_width = len(label) * 6
+        text_height = 12
+    
+    # 计算标签位置（确保不超出图片顶部）
+    label_y = max(y1 - text_height - 4, 4)
+    
+    # 绘制标签背景
+    drawer.rectangle([x1, label_y - 2, x1 + text_width + 4, label_y + text_height + 2], fill=color)
+    
+    # 绘制标签文字
+    drawer.text((x1 + 2, label_y), label, fill="black")
 
 
 def draw_all_boxes_pil(image_path: str, detections: list, output_path: str):
@@ -125,11 +149,16 @@ def draw_all_boxes_pil(image_path: str, detections: list, output_path: str):
             colors[class_name] = color_list[len(colors) % len(color_list)]
         color = colors[class_name]
         
-        drawer.rectangle([x1, y1, x2, y2], outline=color, width=2)
-        drawer.text((x1, max(0, y1 - 12)), f"{class_name}: {confidence:.2f}", fill=color)
+        label = f"{class_name}: {confidence:.2f}"
+        draw_single_box_pil(drawer, x1, y1, x2, y2, label, color)
     
-    # 图例
+    # 添加图例
     legend_y = 20
+    try:
+        font = ImageFont.load_default()
+    except:
+        font = None
+    
     for class_name, color in colors.items():
         drawer.rectangle([10, legend_y - 8, 30, legend_y + 2], fill=color)
         drawer.text((40, legend_y - 5), class_name, fill="white")
@@ -139,16 +168,19 @@ def draw_all_boxes_pil(image_path: str, detections: list, output_path: str):
     print(f"标注图（所有物体）: {output_path}")
 
 
-def draw_boxes_pil(image_path: str, detections: list, output_path: str):
-    """使用PIL绘制检测框（只绘制车辆）"""
+def draw_vehicle_boxes_pil(image_path: str, detections: list, output_path: str):
+    """绘制车辆检测框（使用和所有类一样的样式）"""
     image = Image.open(image_path).convert("RGB")
     drawer = ImageDraw.Draw(image)
-
+    
     for det in detections:
         x1, y1, x2, y2 = det["bbox"]
-        drawer.rectangle([x1, y1, x2, y2], outline=(0, 255, 0), width=2)
-        drawer.text((x1, max(0, y1 - 12)), f"vehicle {det['confidence']:.2f}", fill=(0, 255, 0))
-
+        confidence = det["confidence"]
+        
+        label = f"vehicle: {confidence:.2f}"
+        # 使用绿色
+        draw_single_box_pil(drawer, x1, y1, x2, y2, label, "#00FF00")
+    
     image.save(output_path)
     print(f"车辆标注图: {output_path}")
 
@@ -237,6 +269,7 @@ def detect_vehicles(image_path: Path, config: dict) -> dict:
             vehicle_detections.append({
                 "confidence": round(confidence, 3),
                 "bbox": [round(x1, 1), round(y1, 1), round(x2, 1), round(y2, 1)],
+                "class": class_name,
             })
     
     return {
@@ -300,7 +333,7 @@ def main():
         
         if result["detections"]:
             vehicle_annotated_path = output_dir / f"faster_rcnn_vehicle_{image_path.stem}.jpg"
-            draw_boxes_pil(str(image_path), result["detections"], str(vehicle_annotated_path))
+            draw_vehicle_boxes_pil(str(image_path), result["detections"], str(vehicle_annotated_path))
     else:
         print("未检测到任何物体")
 
