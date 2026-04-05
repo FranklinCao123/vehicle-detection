@@ -3,13 +3,14 @@ model:
   weights: models/yolov8s.pt
 
 detection:
-  conf_threshold: 0.1
+  conf_threshold: 0.5
   imgsz: 1280
 
 preprocessing:
   enabled: true
-  clahe_clip_limit: 100  # 从2.0提高到3.0，增强对比度
-  sharpen: true            # 开启锐化
+  color_correction: null   # 新增：开启去灰
+  clahe_clip_limit: 0.8
+  sharpen: true
 
 paths:
   input_dir: data

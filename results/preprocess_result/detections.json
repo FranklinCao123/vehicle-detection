@@ -3,20 +3,41 @@
   "model": "YOLOv8s",
   "all_detections": [
     {
-      "class": "clock",
-      "confidence": 0.321,
+      "class": "boat",
+      "confidence": 0.711,
       "bbox": [
-        122.6,
-        412.5,
-        141.0,
-        437.8
+        737.2,
+        8.3,
+        868.2,
+        138.0
+      ]
+    },
+    {
+      "class": "car",
+      "confidence": 0.524,
+      "bbox": [
+        677.3,
+        232.8,
+        704.6,
+        247.6
       ]
     }
   ],
-  "num_all_detections": 1,
-  "detections": [],
-  "num_detections": 0,
-  "inference_time_ms": 401.0,
-  "conf_threshold": 0.1,
+  "num_all_detections": 2,
+  "detections": [
+    {
+      "confidence": 0.524,
+      "bbox": [
+        677.3,
+        232.8,
+        704.6,
+        247.6
+      ],
+      "class": "car"
+    }
+  ],
+  "num_detections": 1,
+  "inference_time_ms": 394.0,
+  "conf_threshold": 0.5,
   "preprocessing_enabled": true
 }

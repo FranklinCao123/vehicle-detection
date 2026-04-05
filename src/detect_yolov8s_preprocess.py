@@ -1,5 +1,5 @@
 """
-YOLOv8s 车辆检测脚本 - 预处理版本（CLAHE + 锐化）
+YOLOv8s 车辆检测脚本 - (CLAHE + 锐化 + 去灰）
 """
 
 import time
@@ -26,6 +26,7 @@ DEFAULT_CONFIG = {
         "enabled": True,
         "clahe_clip_limit": 2.0,
         "sharpen": True,
+        "color_correction": True,
     },
     "paths": {
         "input_dir": "data",
@@ -55,11 +56,28 @@ def load_config(config_path: str = "config/yolov8s_preprocess.yaml") -> dict:
     return config
 
 
-def simple_preprocess(image_path: str, clip_limit: float = 2.0, sharpen: bool = False) -> np.ndarray:
-    """预处理：CLAHE对比度增强 + 可选锐化"""
+def color_correction(image: np.ndarray) -> np.ndarray:
+    """
+    色彩校正：去除沙尘导致的偏黄/偏灰
+    使用灰度世界算法
+    """
+    result = image.copy().astype(np.float32)
+    mean_rgb = result.mean(axis=(0, 1))
+    gray_value = mean_rgb.mean()
+    for i in range(3):
+        if mean_rgb[i] != 0:
+            result[:, :, i] = result[:, :, i] * (gray_value / mean_rgb[i])
+    return np.clip(result, 0, 255).astype(np.uint8)
+
+
+def simple_preprocess(image_path: str, clip_limit: float = 2.0, sharpen: bool = False, color_correct: bool = False) -> np.ndarray:
+    """预处理：色彩校正 + CLAHE对比度增强 + 可选锐化"""
     img = cv2.imread(image_path)
     if img is None:
         raise ValueError(f"无法读取图片: {image_path}")
+    
+    if color_correct:
+        img = color_correction(img)
     
     lab = cv2.cvtColor(img, cv2.COLOR_BGR2LAB)
     l, a, b = cv2.split(lab)
@@ -79,6 +97,24 @@ def simple_preprocess(image_path: str, clip_limit: float = 2.0, sharpen: bool = 
     return result
 
 
+def draw_single_box(img, x1, y1, x2, y2, label, color):
+    """绘制单个边界框和标签（带背景色）"""
+    h, w = img.shape[:2]
+    x1, y1 = max(0, x1), max(0, y1)
+    x2, y2 = min(w, x2), min(h, y2)
+    
+    # 绘制边界框
+    cv2.rectangle(img, (x1, y1), (x2, y2), color, 2)
+    
+    # 绘制标签背景
+    label_size, _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)
+    label_y = max(y1 - 5, label_size[1] + 5)
+    cv2.rectangle(img, (x1, label_y - label_size[1] - 5), (x1 + label_size[0], label_y), color, -1)
+    
+    # 绘制标签文字
+    cv2.putText(img, label, (x1, label_y - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1)
+
+
 def draw_all_boxes(image_path: str, detections: list, output_path: str):
     """在原图上绘制所有检测到的物体（不同类别用不同颜色）"""
     img = cv2.imread(image_path)
@@ -88,40 +124,28 @@ def draw_all_boxes(image_path: str, detections: list, output_path: str):
     
     h, w = img.shape[:2]
     
-    # 为不同类别分配不同颜色
     colors = {}
     color_list = [
-        (0, 255, 0),    # 绿色 - car
-        (255, 0, 0),    # 蓝色 - truck
-        (0, 0, 255),    # 红色 - bus
-        (255, 255, 0),  # 青色 - motorcycle
-        (255, 0, 255),  # 紫色 - bicycle
-        (0, 255, 255),  # 黄色 - train
-        (128, 0, 128),  # 紫色 - 其他
+        (0, 255, 0),    # 绿色
+        (255, 0, 0),    # 蓝色
+        (0, 0, 255),    # 红色
+        (255, 255, 0),  # 青色
+        (255, 0, 255),  # 紫色
+        (0, 255, 255),  # 黄色
+        (128, 0, 128),  # 紫罗兰
     ]
     
-    for i, det in enumerate(detections):
+    for det in detections:
         x1, y1, x2, y2 = [int(coord) for coord in det["bbox"]]
         confidence = det["confidence"]
         class_name = det.get("class", "unknown")
         
-        # 确保坐标在图片范围内
-        x1, y1 = max(0, x1), max(0, y1)
-        x2, y2 = min(w, x2), min(h, y2)
-        
-        # 为每个类别分配颜色
         if class_name not in colors:
             colors[class_name] = color_list[len(colors) % len(color_list)]
         color = colors[class_name]
         
-        # 绘制边界框
-        cv2.rectangle(img, (x1, y1), (x2, y2), color, 2)
-        
-        # 添加标签（类别名 + 置信度）
         label = f"{class_name}: {confidence:.2f}"
-        label_size, _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)
-        cv2.rectangle(img, (x1, y1 - label_size[1] - 5), (x1 + label_size[0], y1), color, -1)
-        cv2.putText(img, label, (x1, y1 - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1)
+        draw_single_box(img, x1, y1, x2, y2, label, color)
     
     # 添加图例
     legend_y = 30
@@ -134,6 +158,25 @@ def draw_all_boxes(image_path: str, detections: list, output_path: str):
     print(f"标注图（所有物体）: {output_path}")
 
 
+def draw_vehicle_boxes(image_path: str, detections: list, output_path: str):
+    """绘制车辆检测框"""
+    img = cv2.imread(image_path)
+    if img is None:
+        print(f"无法读取图片: {image_path}")
+        return
+    
+    for det in detections:
+        x1, y1, x2, y2 = [int(coord) for coord in det["bbox"]]
+        confidence = det["confidence"]
+        
+        label = f"vehicle: {confidence:.2f}"
+        # 使用绿色，和之前保持一致
+        draw_single_box(img, x1, y1, x2, y2, label, (0, 255, 0))
+    
+    cv2.imwrite(output_path, img)
+    print(f"车辆标注图: {output_path}")
+
+
 def detect_vehicles(image_path: str, config: dict) -> dict:
     """检测所有物体（不限于车辆）"""
     print(f"检测: {Path(image_path).name}")
@@ -143,10 +186,14 @@ def detect_vehicles(image_path: str, config: dict) -> dict:
     if pre_cfg.get("enabled", True):
         clip_limit = pre_cfg.get("clahe_clip_limit", 2.0)
         sharpen = pre_cfg.get("sharpen", False)
-        processed_img = simple_preprocess(image_path, clip_limit, sharpen)
+        color_correct = pre_cfg.get("color_correction", False)
+        processed_img = simple_preprocess(image_path, clip_limit, sharpen, color_correct)
         source = processed_img
         
-        pre_steps = [f"CLAHE(强度={clip_limit})"]
+        pre_steps = []
+        if color_correct:
+            pre_steps.append("去灰")
+        pre_steps.append(f"CLAHE(强度={clip_limit})")
         if sharpen:
             pre_steps.append("锐化")
         print(f"   预处理: {' + '.join(pre_steps)}")
@@ -164,7 +211,6 @@ def detect_vehicles(image_path: str, config: dict) -> dict:
     results = model.predict(source=source, conf=conf_threshold, imgsz=imgsz, verbose=False)
     elapsed_ms = (time.time() - start_time) * 1000
     
-    # 解析所有检测结果
     all_detections = []
     vehicle_detections = []
     
@@ -183,8 +229,7 @@ def detect_vehicles(image_path: str, config: dict) -> dict:
             })
             
             print(f"     - {class_name}: conf={confidence:.3f}, "
-                  f"size={int(x2-x1)}x{int(y2-y1)}, "
-                  f"位置=[{x1:.0f},{y1:.0f},{x2:.0f},{y2:.0f}]")
+                  f"size={int(x2-x1)}x{int(y2-y1)}")
             
             if class_name.lower() in VEHICLE_CLASSES:
                 vehicle_detections.append({
@@ -213,7 +258,7 @@ def main():
     output_dir = Path(config["paths"]["output_dir"]) / "preprocess_result"
     
     print("\n" + "=" * 50)
-    print(" YOLOv8s 检测 - CLAHE + 锐化版")
+    print(" YOLOv8s 检测 - CLAHE + 锐化 + 去灰版")
     print("=" * 50)
     
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -234,18 +279,13 @@ def main():
     result = detect_vehicles(str(image_path), config)
     print_summary(result)
     
-    # ===== 关键修改：标注所有检测到的物体 =====
     if result["all_detections"]:
-        # 标注所有物体（不限于车辆）
         annotated_path = output_dir / f"result_all_{image_path.stem}.jpg"
         draw_all_boxes(str(image_path), result["all_detections"], str(annotated_path))
         
-        # 如果只想要车辆标注，可以再保存一份
         if result["detections"]:
             vehicle_annotated_path = output_dir / f"result_vehicle_{image_path.stem}.jpg"
-            from utils import draw_boxes
-            draw_boxes(str(image_path), result["detections"], str(vehicle_annotated_path))
-            print(f"车辆标注图: {vehicle_annotated_path}")
+            draw_vehicle_boxes(str(image_path), result["detections"], str(vehicle_annotated_path))
     else:
         print("未检测到任何物体")
     
